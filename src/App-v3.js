@@ -16,13 +16,6 @@ export default function App() {
 
   const [watched, setWatched] = useLocalStorageState([], "watched");
 
-  //   const [watched, setWatched] = useState([]);
-
-  // const [watched, setWatched] = useState(function () {
-  //   const storedValue = localStorage.getItem("watched");
-  //   return JSON.parse(storedValue);
-  // });
-
   function handleSelectMovie(id) {
     setSelectedId((selectedId) => (id === selectedId ? null : id));
   }
@@ -33,20 +26,11 @@ export default function App() {
 
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
-
-    // localStorage.setItem("watched", JSON.stringify([...watched, movie]));
   }
 
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
-
-  //   useEffect(
-  //     function () {
-  //       localStorage.setItem("watched", JSON.stringify(watched));
-  //     },
-  //     [watched]
-  //   );
 
   return (
     <>
@@ -116,12 +100,6 @@ function Logo() {
 }
 
 function Search({ query, setQuery }) {
-  //   useEffect(function () {
-  //     const el = document.querySelector(".search");
-  //     console.log(el);
-  //     el.focus();
-  //   }, []);
-
   const inputEl = useRef(null);
 
   useKey("Enter", function () {
@@ -129,23 +107,6 @@ function Search({ query, setQuery }) {
     inputEl.current.focus();
     setQuery("");
   });
-
-  //   useEffect(
-  //     function () {
-  //       function callback(e) {
-  //         if (document.activeElement === inputEl.current) return;
-
-  //         if (e.code === "Enter") {
-  //           inputEl.current.focus();
-  //           setQuery("");
-  //         }
-  //       }
-
-  //       document.addEventListener("keydown", callback);
-  //       return () => document.addEventListener("keydown", callback);
-  //     },
-  //     [setQuery]
-  //   );
 
   return (
     <input
@@ -239,24 +200,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     Director: director,
     Genre: genre,
   } = movie;
-
-  //   if (imdbRating > 8) [isTop, setIsTop] = useState(true);
-  //   if (imdbRating > 8) return <p> Greatest ever!</p>;
-
-  //   const [isTop, setIsTop] = useState(imdbRating > 8); initial state is onl looked at by react at initial render
-  //   console.log(isTop);
-
-  //   useEffect(
-  //     function () {
-  //       setIsTop(imdbRating > 8);
-  //     },
-  //     [imdbRating]
-  //   );
-
-  //   const isTop = imdbRating > 8;
-  //   console.log(isTop);
-
-  //   const [avgRating, setAvgRating] = useState(0);
   function handleAdd() {
     const newWatchedMovie = {
       imdbID: selectedId,
@@ -271,12 +214,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
     onAddWatched(newWatchedMovie);
     onCloseMovie();
-
-    // setAvgRating(Number(imdbRating));
-    // alert(avgRating); //0 //react updates state asynchronously
-
-    // setAvgRating((avgRating + userRating) / 2); //avgRating will still be 0 //state updates = asynchronous //avgRating state is stale
-    // setAvgRating((avgRating) => (avgRating + userRating) / 2); // using a callback solves the problem since it gives access to the new value
   }
 
   useEffect(
@@ -312,24 +249,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   );
 
   useKey("Escape", onCloseMovie);
-
-  //   useEffect(
-  //     function () {
-  //       function callback(e) {
-  //         if (e.code === "Escape") {
-  //           onCloseMovie();
-  //           console.log("Closing");
-  //         }
-  //       }
-
-  //       document.addEventListener("keydown", callback);
-
-  //       return function () {
-  //         document.removeEventListener("keydown", callback);
-  //       };
-  //     },
-  //     [onCloseMovie]
-  //   );
 
   return (
     <div className="details">

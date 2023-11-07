@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 
-//
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
@@ -10,34 +9,16 @@ const KEY = "f12f27c7";
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
-  //   const tempQuery = "oppenheimer";
 
-  //   useEffect(function () {
-  //     console.log("After initial render");
-  //   }, []);
+  //   const [watched, setWatched] = useState([]);
 
-  //   useEffect(function () {
-  //     console.log("After every render");
-  //   });
-
-  //   useEffect(
-  //     function () {
-  //       console.log("D");
-  //     },
-  //     [query]
-  //   );
-
-  //   console.log("During render");
-
-  //   useEffect(function () {
-  //     fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=oppenheimer`)
-  //       .then((res) => res.json())
-  //       .then((data) => setMovies(data.Search));
-  //   }, []);
+  const [watched, setWatched] = useState(function () {
+    const storedValue = localStorage.getItem("watched");
+    return JSON.parse(storedValue);
+  });
 
   function handleSelectMovie(id) {
     setSelectedId((selectedId) => (id === selectedId ? null : id));
@@ -49,11 +30,20 @@ export default function App() {
 
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
+
+    // localStorage.setItem("watched", JSON.stringify([...watched, movie]));
   }
 
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
+
+  useEffect(
+    function () {
+      localStorage.setItem("watched", JSON.stringify(watched));
+    },
+    [watched]
+  );
 
   useEffect(
     function () {
@@ -76,7 +66,6 @@ export default function App() {
 
           setMovies(data.Search);
           setError("");
-          //   console.log(data.Search);
         } catch (error) {
           if (error.name !== "AbortError") {
             console.log(error.message);
@@ -111,7 +100,6 @@ export default function App() {
       </NavBar>
 
       <Main>
-        {/* <Box>{isLoading ? <Loader /> : <MovieList movies={movies} />}</Box> */}
         <Box>
           {isLoading && <Loader />}
           {!isLoading && !error && (
@@ -172,6 +160,30 @@ function Logo() {
 }
 
 function Search({ query, setQuery }) {
+  //   useEffect(function () {
+  //     const el = document.querySelector(".search");
+  //     console.log(el);
+  //     el.focus();
+  //   }, []);
+
+  const inputEl = useRef(null);
+  useEffect(
+    function () {
+      function callback(e) {
+        if (document.activeElement === inputEl.current) return;
+
+        if (e.code === "Enter") {
+          inputEl.current.focus();
+          setQuery("");
+        }
+      }
+
+      document.addEventListener("keydown", callback);
+      return () => document.addEventListener("keydown", callback);
+    },
+    [setQuery]
+  );
+
   return (
     <input
       className="search"
@@ -179,6 +191,7 @@ function Search({ query, setQuery }) {
       placeholder="Search movies..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
+      ref={inputEl}
     />
   );
 }
@@ -241,7 +254,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const watchedUserRating = watched.find(
     (movie) => movie.imdbID === selectedId
   )?.userRating;
-  //   console.log(isWatched);
 
   const {
     Title: title,
@@ -256,8 +268,23 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     Genre: genre,
   } = movie;
 
-  //   console.log(title, year);
+  //   if (imdbRating > 8) [isTop, setIsTop] = useState(true);
+  //   if (imdbRating > 8) return <p> Greatest ever!</p>;
 
+  //   const [isTop, setIsTop] = useState(imdbRating > 8); initial state is onl looked at by react at initial render
+  //   console.log(isTop);
+
+  //   useEffect(
+  //     function () {
+  //       setIsTop(imdbRating > 8);
+  //     },
+  //     [imdbRating]
+  //   );
+
+  //   const isTop = imdbRating > 8;
+  //   console.log(isTop);
+
+  //   const [avgRating, setAvgRating] = useState(0);
   function handleAdd() {
     const newWatchedMovie = {
       imdbID: selectedId,
@@ -271,6 +298,12 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
     onAddWatched(newWatchedMovie);
     onCloseMovie();
+
+    // setAvgRating(Number(imdbRating));
+    // alert(avgRating); //0 //react updates state asynchronously
+
+    // setAvgRating((avgRating + userRating) / 2); //avgRating will still be 0 //state updates = asynchronous //avgRating state is stale
+    // setAvgRating((avgRating) => (avgRating + userRating) / 2); // using a callback solves the problem since it gives access to the new value
   }
 
   useEffect(
@@ -282,8 +315,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
         );
 
         const data = await res.json();
-
-        // console.log(data);
 
         setMovie(data);
 
@@ -347,6 +378,8 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
               </p>
             </div>
           </header>
+
+          {/* <p>{avgRating}</p> */}
           <section>
             <div className="rating">
               {!isWatched ? (
